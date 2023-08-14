@@ -9,7 +9,7 @@ import org.apache.spark.sql.functions._
   * Usage: MnMcount <mnm_file_dataset>
   */
 object MnMcount {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val spark = SparkSession
       .builder
       .appName("MnMCount")
@@ -49,7 +49,9 @@ object MnMcount {
       .orderBy(desc("sum(Count)"))
 
     // show the resulting aggregation for California
-    caCountMnNDF.show(10)
+    // caCountMnNDF.show(10)
+    println("web UI still running, press any key to terminate")
+    System.in.read()
   }
 }
 // scalastyle:on println
