@@ -2,15 +2,18 @@ package main.scala.chapter3
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.functions.{col, desc, expr, when, year, month, date_format}
+import org.apache.spark.sql.functions._
 
-object Example3_FireDepartment {
+
+object Example3_FireDepartmentDataFrame {
   def main(args: Array[String]) {
 
     val spark = SparkSession
       .builder
-      .appName("Example3_FireDepartment")
+      .appName("Example3_FireDepartmentDataFrame")
       .getOrCreate()
+
+    import spark.implicits._
 
     if (args.length <= 0) {
       println("usage Example3_FireDepartment <file path to csv")
@@ -37,7 +40,7 @@ object Example3_FireDepartment {
                       .csv(csvFile)
                       //sanitize null CallTypeGroup values in some rows where CallType contains fire
                       .withColumn("CallTypeGroup", 
-                        when(col("CallTypeGroup").isNull && col("CallType").contains("Fire"), "Fire").otherwise(col("CallTypeGroup")))
+                        when($"CallTypeGroup".isNull && $"CallType".contains("Fire"), "Fire").otherwise($"CallTypeGroup"))
 
     fireDf.schema.printTreeString()
     println(s"schema string: [${fireDf.columns.mkString(",")}]")
@@ -56,21 +59,46 @@ object Example3_FireDepartment {
 
     println("different types of fire calls in 2018")
     fireDf.select("CallType")
-          .where(year(col("CallDate")) === 2018 && col("CallTypeGroup") === "Fire")
+          .where(year($"CallDate") === 2018 && $"CallTypeGroup" === "Fire")
           .groupBy("CallType")
           .count()
           .orderBy(desc("count"))
           .show(false)
 
     println("what months in 2018 saw the highest number of fire calls")
-    fireDf.select(date_format(col("CallDate"), "yyyy/MMM").as("month"))
-          .where(year(col("CallDate")) === 2018 && col("CallTypeGroup") === "Fire")
+    fireDf.select(date_format($"CallDate", "yyyy/MMM").as("month"))
+          .where(year($"CallDate") === 2018 && $"CallTypeGroup" === "Fire")
           .groupBy("month")
           .count()
           .orderBy(desc("count"))
           .show(false)
 
-    println("web UI still running, press any key to terminate")
+    println("which neighborhoods that generated the most fire calls in 2018")
+    fireDf.select("Neighborhood")
+          .where(year($"CallDate") === 2018 && $"CallTypeGroup" === "Fire")
+          .groupBy("Neighborhood")
+          .count()
+          .orderBy(desc("count"))
+          .show(false)
+
+    println("which week in 2018 had the most fire calls")
+    fireDf.select(concat(year($"CallDate"), typedlit("/CW"), weekofyear($"CallDate")).as("week"))
+          .where(year($"CallDate") === 2018 && $"CallTypeGroup" === "Fire")
+          .groupBy("week")
+          .count()
+          .orderBy(desc("count"))
+          .show(false)
+
+    println("is there a correlation between neighborhood, zip code, and number of fire calls?")
+    //TODO: solve
+
+    println("how can we use parquet files or SQL tables to store this data and then read it back?")
+    //TODO: solve
+
+
+
+
+    println("web UI still running, press ENTER to terminate")
     System.in.read()
 
   }

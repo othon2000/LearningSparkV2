@@ -50,7 +50,7 @@ object MnMcount {
 
     // show the resulting aggregation for California
     // caCountMnNDF.show(10)
-    println("web UI still running, press any key to terminate")
+    println("web UI still running, press ENTER to terminate")
     System.in.read()
   }
 }

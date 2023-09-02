@@ -7,3 +7,4 @@ scalaVersion := "2.12.17"
 
 lazy val chapter2 = (project in file("chapter2/scala"))
 lazy val chapter3 = (project in file("chapter3/scala"))
+lazy val chapter8 = (project in file("chapter8/scala"))
