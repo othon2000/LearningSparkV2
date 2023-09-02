@@ -14,6 +14,8 @@ object Example8 {
 
     spark.conf.set("spark.sql.shuffle.partitions", 5) //default is 200
 
+    spark.streams.addListener(getListener())
+
     val lines = spark.readStream
                      .format("socket")
                      .option("host", "localhost")
@@ -36,5 +38,22 @@ object Example8 {
 
     streamingQuery.awaitTermination()
 
+  }
+
+  private def getListener(): StreamingQueryListener = {
+    new StreamingQueryListener() {
+      override def onQueryStarted(event: StreamingQueryListener.QueryStartedEvent): Unit = {
+        println(s"query started [${event.id}]")
+      }
+
+      override def onQueryProgress(event: StreamingQueryListener.QueryProgressEvent): Unit = {
+        // quite verbose, uncomment for testing
+        //println(s"query made progress [${event.progress}]")
+      }
+
+      override def onQueryTerminated(event: StreamingQueryListener.QueryTerminatedEvent): Unit = {
+        println(s"query terminated [${event.id}]")
+      }
+    }
   }
 }
