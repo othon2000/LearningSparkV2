@@ -23,7 +23,10 @@ object Example8 {
                      .load()
     
     val words = lines.select(explode(split(col("value"), "\\s")).as("word"))
-    val counts = words.groupBy("word")
+
+    val wordsWithTs = words.withColumn("ts", current_timestamp())
+
+    val counts = wordsWithTs.groupBy(col("word"), date_format(col("ts"), "yyyy-MM-dd HH:mm").as("minute"))
                       .count()
                       .orderBy(desc("count"))
 
